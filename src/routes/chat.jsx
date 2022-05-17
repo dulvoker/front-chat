@@ -6,8 +6,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 export default function Chat() {
   const [userName, setUserName] = useState('Borjomi');
   const [chatMessages, setChatMessages] = useState([
-    ['Dulat', 'Hi!'],
-    ['Berik', 'Hi there!'],
   ]);
   const [newMessage, setNewMessage] = useState('');
 
@@ -18,6 +16,14 @@ export default function Chat() {
       const response = await axios.get('http://localhost:8000/api/current_user',{withCredentials: true});
       const userName = response.data;
       setUserName(userName);
+
+      const messagesFromDbResponse = await axios.get('http://localhost:8000/api/messages', {withCredentials: true});
+
+      const newMessages = messagesFromDbResponse.data.map((e) => [e.sender, e.message]);
+
+      setChatMessages(newMessages);
+
+      // console.log(messagesFromDbResponse)
 
       webSocket.current = new WebSocket('ws://localhost:8000/api/chat');
 
@@ -51,11 +57,11 @@ export default function Chat() {
         <h2>Chat</h2>
         <h2>User Name = {userName}</h2>
         <h2>New chat message = {newMessage}</h2>
-        {chatMessages.map((chatMessage) => {
+        {chatMessages.map((chatMessage, index) => {
           const [sender, text] = chatMessage;
 
           return (
-            <div>
+            <div key = {index}>
               <strong>{sender}</strong>: {text};
             </div>
           );
