@@ -32,8 +32,9 @@ export default function Chat() {
 
         const sender = data['sender'];
         const text = data['message'];
+        const date = data['date'];
 
-        setChatMessages(oldChatMessages => [...oldChatMessages, [sender, text]]);
+        setChatMessages(oldChatMessages => [...oldChatMessages, [sender, text, date]]);
       }
     }
     fetchMyApi();
@@ -58,11 +59,11 @@ export default function Chat() {
         <h2>User Name = {userName}</h2>
         <h2>New chat message = {newMessage}</h2>
         {chatMessages.map((chatMessage, index) => {
-          const [sender, text] = chatMessage;
+          const [sender, text, date] = chatMessage;
 
           return (
             <div key = {index}>
-              <strong>{sender}</strong>: {text};
+              <strong>{sender}</strong>: {text} ({date ? (new Date(date * 1000)).toString() : "no date information"})<br/>
             </div>
           );
         })}
