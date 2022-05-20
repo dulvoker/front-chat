@@ -7,6 +7,9 @@ export default function Chat() {
   const [userName, setUserName] = useState('Borjomi');
   const [chatMessages, setChatMessages] = useState([
   ]);
+
+  const [avatarURL, setAvatarURL] = useState('')
+
   const [newMessage, setNewMessage] = useState('');
 
   const webSocket = useRef();
@@ -14,12 +17,14 @@ export default function Chat() {
   useEffect(() => {
     async function fetchMyApi(){
       const response = await axios.get('http://localhost:8000/api/current_user',{withCredentials: true});
-      const userName = response.data;
+      const userName = response.data.username;
+      const avatarURL = response.data.avatarURL
       setUserName(userName);
+      setAvatarURL(avatarURL);
 
       const messagesFromDbResponse = await axios.get('http://localhost:8000/api/messages', {withCredentials: true});
 
-      const newMessages = messagesFromDbResponse.data.map((e) => [e.sender, e.message]);
+      const newMessages = messagesFromDbResponse.data.map((e) => [e.sender, e.message, e.date, e.avatarURL]);
 
       setChatMessages(newMessages);
 
@@ -33,8 +38,9 @@ export default function Chat() {
         const sender = data['sender'];
         const text = data['message'];
         const date = data['date'];
+        const avatarURL = data['avatarURL'];
 
-        setChatMessages(oldChatMessages => [...oldChatMessages, [sender, text, date]]);
+        setChatMessages(oldChatMessages => [...oldChatMessages, [sender, text, date, avatarURL]]);
       }
     }
     fetchMyApi();
@@ -46,6 +52,7 @@ export default function Chat() {
         {
           "sender": userName,
           "message": newMessage,
+          "avatarURL": avatarURL
         }
       ));
 
@@ -59,11 +66,11 @@ export default function Chat() {
         <h2>User Name = {userName}</h2>
         <h2>New chat message = {newMessage}</h2>
         {chatMessages.map((chatMessage, index) => {
-          const [sender, text, date] = chatMessage;
+          const [sender, text, date, avatarURL] = chatMessage;
 
           return (
             <div key = {index}>
-              <strong>{sender}</strong>: {text} ({date ? (new Date(date * 1000)).toString() : "no date information"})<br/>
+              { avatarURL ? <img src = {avatarURL} width = {50}/> : null} <strong>{sender}</strong>: {text} ({date ? (new Date(date * 1000)).toString() : "no date information"})<br/>
             </div>
           );
         })}
